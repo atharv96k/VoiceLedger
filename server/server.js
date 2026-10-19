@@ -10,14 +10,21 @@ import * as Sentry from "@sentry/node";
 import crypto from "crypto";
 
 // FIXED: Correct casing matching your models/ folder files
-import Client from "./models/Client.js";
-import Invoice from "./models/Invoice.js";
+import Client from "./models/client.js";
+import Invoice from "./models/invoice.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    mongodb: isMongoConnected ? "connected" : "disconnected",
+  });
+});
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -429,6 +436,7 @@ app.get("/api/ledger", async (req, res) => {
   const items = await Invoice.find().sort({ createdAt: -1 }).limit(20);
   res.json({ items });
 });
+
 
 app.post("/api/ledger", async (req, res) => {
   if (!isMongoConnected) {
